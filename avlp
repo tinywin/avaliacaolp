@@ -1,0 +1,211 @@
+#include <stdio.h>
+
+// Número máximo de pedidos
+#define MAX_PEDIDOS 10
+
+// Dados de um pedido
+struct pedido {
+  int tipo;
+  int quantidade;
+  int local;
+  float custo_envio;
+};
+
+// Dados de um cliente
+struct cliente {
+  struct pedido pedidos[MAX_PEDIDOS];
+  int num_pedidos;
+};
+
+// Função que lê os dados de um pedido do usuário
+void ler_pedido(struct pedido *p) {
+  printf("Tipo de produto (1-AC3, 2-AC2, 3-Rejunte): ");
+  scanf("%d", &p->tipo);
+
+  printf("Quantidade de pacotes: ");
+  scanf("%d", &p->quantidade);
+
+  printf("Local de entrega (1-Palmas, 2-Porto Nacional): ");
+  scanf("%d", &p->local);
+
+  // Calcula o custo de envio do pedido
+  float peso = p->quantidade;
+  if (p->tipo == 1 || p->tipo == 2) {
+    // AC3 ou AC2: 20 kg por pacote
+    peso *= 20;
+  } else {
+    // Rejunte: 5 kg por pacote
+    peso *= 5;
+  }
+
+  if (peso < 1000) {
+    // Pedido com menos de 1000 kg: envio gratuito
+    p->custo_envio = 0;
+  } else if (peso <= 2000) {
+    // Pedido com peso entre 1001 e 2000 kg
+    if (p->local == 1) {
+      // Palmas: R$ 100,00
+      p->custo_envio = 100;
+    } else {
+      // Porto Nacional: R$ 200,00
+      p->custo_envio = 200;
+    }
+  } else {
+    // Pedido com peso acima de 2000 kg: 2 reais por pacote
+    p->custo_envio = p->quantidade * 2;
+  }
+}
+
+// Função que imprime os dados de um pedido
+void imprimir_pedido(struct pedido p) {
+  printf("Tipo de produto: ");
+  switch (p.tipo) {
+    case 1:
+      printf("AC3");
+      break;
+    case 2:
+      printf("AC2");
+      break;
+    case 3:
+      printf("Rejunte");
+      break;
+  }
+
+  printf("\nQuantidade: %d\n", p.quantidade);
+
+  printf("Local de entrega: ");
+  if (p.local == 1) {
+    printf("Palmas");
+  } else {
+    printf("Porto Nacional");
+}
+
+printf("\nCusto de envio: %.2f\n", p.custo_envio);
+}
+
+// Função que lê os dados de um cliente do usuário
+void ler_cliente(struct cliente *c) {
+printf("Número de pedidos (máximo %d): ", MAX_PEDIDOS);
+scanf("%d", &c->num_pedidos);
+
+// Lê os pedidos do cliente
+for (int i = 0; i < c->num_pedidos; i++) {
+printf("\nPedido %d\n", i + 1);
+ler_pedido(&c->pedidos[i]);
+}
+}
+
+// Função que imprime os dados de um cliente
+void imprimir_cliente(struct cliente c) {
+printf("Número de pedidos: %d\n", c.num_pedidos);
+
+// Calcula o peso médio dos pedidos do cliente
+float peso_total = 0;
+for (int i = 0; i < c.num_pedidos; i++) {
+struct pedido p = c.pedidos[i];
+peso_total += p.quantidade;
+if (p.tipo == 1 || p.tipo == 2) {
+// AC3 ou AC2: 20 kg por pacote
+peso_total *= 20;
+} else {
+// Rejunte: 5 kg por pacote
+peso_total *= 5;
+}
+}
+float peso_medio = peso_total / c.num_pedidos;
+
+printf("Peso médio dos pedidos: %.2f\n", peso_medio);
+}
+
+int main() {
+// Lê os dados dos clientes
+struct cliente clientes[2];
+for (int i = 0; i < 2; i++) {
+printf("\nCliente %d\n", i + 1);
+ler_cliente(&clientes[i]);
+}
+
+int opcao;
+do {
+printf("\nEscolha um relatório:\n");
+printf("1 - Relatório geral\n");
+printf("2 - Relatório por cliente\n");
+printf("3 - Relatório por pedido\n");
+printf("4 - Sair\n");
+printf("Opção: ");
+scanf("%d", &opcao);
+  switch (opcao) {
+  case 1: {
+// Imprime o relatório geral
+float peso_total = 0;
+int num_pedidos_menos_1000 = 0;
+for (int i = 0; i < 2; i++) {
+  struct cliente c = clientes[i];
+  for (int j = 0; j < c.num_pedidos; j++) {
+    struct pedido p = c.pedidos[j];
+
+    // Calculate the weight of the order in kg
+    float peso_pedido = 0;
+    if (p.tipo == 1 || p.tipo == 2) {
+      // AC3 or AC2: 20 kg per package
+      peso_pedido = p.quantidade * 20;
+    } else {
+      // Rejunte: 5 kg per package
+      peso_pedido = p.quantidade * 5;
+    }
+
+    // Add the weight of the order to the total weight
+    peso_total += peso_pedido;
+
+    // Update the number of orders that weigh less than 1000 kg
+    if (peso_pedido < 1000) {
+      num_pedidos_menos_1000++;
+    }
+  }
+}
+
+printf("\nRelatório geral:\n");
+printf("Peso total de material vendido: %.2f\n", peso_total);
+printf("Número de pedidos com menos de 1000 kg: %d\n", num_pedidos_menos_1000);
+
+    break;
+  }
+
+  case 2: {
+    // Lê o número do cliente do usuário
+    int num_cliente;
+    printf("Número do cliente (1 ou 2): ");
+    scanf("%d", &num_cliente);
+
+    // Imprime o relatório por cliente
+    printf("\nRelatório por cliente %d\n", num_cliente);
+    imprimir_cliente(clientes[num_cliente - 1]);
+    break;
+  }
+
+  case 3: {
+    // Lê o número do cliente e o número do pedido do usuário
+    int num_cliente, num_pedido;
+    printf("Número do cliente (1 ou 2): ");
+    scanf("%d", &num_cliente);
+    printf("Número do pedido: ");
+    scanf("%d", &num_pedido);
+
+    // Imprime o relatório por pedido
+    printf("\nRelatório por pedido %d do cliente %d\n", num_pedido, num_cliente);
+    imprimir_pedido(clientes[num_cliente - 1].pedidos[num_pedido - 1]);
+    break;
+  }
+
+  case 4:
+    // Sair
+    break;
+
+  default:
+    printf("Opção inválida!\n");
+    break;
+}
+} while (opcao != 4);
+
+return 0;
+  }
